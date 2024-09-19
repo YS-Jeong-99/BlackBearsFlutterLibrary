@@ -24,8 +24,7 @@ class DaumPostcodeSearchExample extends StatefulWidget {
   final String title;
 
   @override
-  _DaumPostcodeSearchExampleState createState() =>
-      _DaumPostcodeSearchExampleState();
+  _DaumPostcodeSearchExampleState createState() => _DaumPostcodeSearchExampleState();
 }
 
 class _DaumPostcodeSearchExampleState extends State<DaumPostcodeSearchExample> {
@@ -95,14 +94,12 @@ class _DaumPostcodeSearchExampleState extends State<DaumPostcodeSearchExample> {
                           padding: EdgeInsets.all(10),
                           child: RichText(
                             text: TextSpan(
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 20),
+                              style: TextStyle(color: Colors.black, fontSize: 20),
                               children: [
                                 WidgetSpan(
                                   child: Icon(
                                     Icons.check_circle,
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
+                                    color: Theme.of(context).colorScheme.secondary,
                                   ),
                                 ),
                                 TextSpan(text: "주소 검색 결과"),
@@ -111,8 +108,7 @@ class _DaumPostcodeSearchExampleState extends State<DaumPostcodeSearchExample> {
                           ),
                         ),
                         Table(
-                          border: TableBorder.symmetric(
-                              inside: BorderSide(color: Colors.grey)),
+                          border: TableBorder.symmetric(inside: BorderSide(color: Colors.grey)),
                           columnWidths: {
                             0: FlexColumnWidth(1),
                             1: FlexColumnWidth(2),
@@ -124,8 +120,7 @@ class _DaumPostcodeSearchExampleState extends State<DaumPostcodeSearchExample> {
                             ),
                             _buildTableRow(
                               "영문주소",
-                              _daumPostcodeSearchDataModel?.addressEnglish ??
-                                  "",
+                              _daumPostcodeSearchDataModel?.addressEnglish ?? "",
                             ),
                             _buildTableRow(
                               "우편번호",
@@ -133,14 +128,11 @@ class _DaumPostcodeSearchExampleState extends State<DaumPostcodeSearchExample> {
                             ),
                             _buildTableRow(
                               "지번주소",
-                              _daumPostcodeSearchDataModel?.autoJibunAddress ??
-                                  "",
+                              _daumPostcodeSearchDataModel?.autoJibunAddress ?? "",
                             ),
                             _buildTableRow(
                               "지번주소(영문)",
-                              _daumPostcodeSearchDataModel
-                                      ?.autoJibunAddressEnglish ??
-                                  "",
+                              _daumPostcodeSearchDataModel?.autoJibunAddressEnglish ?? "",
                             )
                           ],
                         )
@@ -170,16 +162,16 @@ class _SearchingPageState extends State<SearchingPage> {
   Widget build(BuildContext context) {
     DaumPostcodeSearch daumPostcodeSearch = DaumPostcodeSearch(
       onConsoleMessage: (_, message) => print(message),
-      onLoadError: (controller, uri, errorCode, message) => setState(
+      onReceivedError: (controller, webResourceRequest, webResourceError) => setState(
         () {
           _isError = true;
-          errorMessage = message;
+          errorMessage = webResourceError.description;
         },
       ),
-      onLoadHttpError: (controller, uri, errorCode, message) => setState(
+      onReceivedHttpError: (controller, webResourceRequest, webResourceResponse) => setState(
         () {
           _isError = true;
-          errorMessage = message;
+          errorMessage = webResourceResponse.reasonPhrase ?? '';
         },
       ),
     );

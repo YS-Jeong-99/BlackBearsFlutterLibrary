@@ -10,34 +10,25 @@ class DaumPostcodeSearch extends StatefulWidget {
   final String assetPath;
   final _DaumPostcodeSearchState _state = _DaumPostcodeSearchState();
 
-  final void Function(InAppWebViewController controller, Uri? url,
-      int statusCode, String description)? onLoadHttpError;
-  final void Function(InAppWebViewController controller, Uri? url, int code,
-      String message)? onLoadError;
-  final void Function(InAppWebViewController controller, int progress)?
-      onProgressChanged;
-  final void Function(
-          InAppWebViewController controller, ConsoleMessage consoleMessage)?
-      onConsoleMessage;
-  final InAppWebViewGroupOptions? initialOption;
-  final Future<PermissionRequestResponse?> Function(
-      InAppWebViewController controller,
-      String origin,
-      List<String> resources)? androidOnPermissionRequest;
+  final void Function(InAppWebViewController controller, WebResourceRequest webResourceRequest, WebResourceResponse webResourceResponse)? onReceivedHttpError;
+  final void Function(InAppWebViewController controller, WebResourceRequest webResourceRequest, WebResourceError webResourceError)? onReceivedError;
+  final void Function(InAppWebViewController controller, int progress)? onProgressChanged;
+  final void Function(InAppWebViewController controller, ConsoleMessage consoleMessage)? onConsoleMessage;
+  final InAppWebViewSettings? initialSettings;
+  final Future<PermissionResponse?> Function(InAppWebViewController controller, PermissionRequest permissionRequest)? onPermissionRequest;
 
   InAppWebViewController? get controller => this._state._controller;
 
   DaumPostcodeSearch({
     Key? key,
     this.webPageTitle = "주소 검색",
-    this.assetPath =
-        "packages/daum_postcode_search/lib/assets/daum_search.html",
-    this.onLoadError,
-    this.onLoadHttpError,
+    this.assetPath = "packages/daum_postcode_search/lib/assets/daum_search.html",
+    this.onReceivedHttpError,
+    this.onReceivedError,
     this.onProgressChanged,
-    this.androidOnPermissionRequest,
+    this.onPermissionRequest,
     this.onConsoleMessage,
-    this.initialOption,
+    this.initialSettings,
   }) : super(key: key);
 
   @override
@@ -74,29 +65,22 @@ class _DaumPostcodeSearchState extends State<DaumPostcodeSearch> {
     if (isServerRunning) {
       result = InAppWebView(
         initialUrlRequest: URLRequest(
-          url: Uri.parse(
+          url: WebUri(
             "http://localhost:8080/${widget.assetPath}",
           ),
         ),
-        initialOptions: widget.initialOption ??
-            InAppWebViewGroupOptions(
-              crossPlatform: InAppWebViewOptions(
-                useShouldOverrideUrlLoading: true,
-                mediaPlaybackRequiresUserGesture: false,
-              ),
-              android: AndroidInAppWebViewOptions(
-                useHybridComposition: true,
-              ),
-              ios: IOSInAppWebViewOptions(
-                allowsInlineMediaPlayback: true,
-              ),
+        initialSettings: widget.initialSettings ??
+            InAppWebViewSettings(
+              mediaPlaybackRequiresUserGesture: false,
+              useHybridComposition: true,
+              allowsInlineMediaPlayback: true,
             ),
-        androidOnPermissionRequest: widget.androidOnPermissionRequest ??
-            (InAppWebViewController controller, String origin,
-                List<String> resources) async {
-              return PermissionRequestResponse(
-                  resources: resources,
-                  action: PermissionRequestResponseAction.GRANT);
+        onPermissionRequest: widget.onPermissionRequest ??
+            (controller, permissionRequest) async {
+              return PermissionResponse(
+                resources: permissionRequest.resources,
+                action: PermissionResponseAction.GRANT,
+              );
             },
         onWebViewCreated: (InAppWebViewController webViewController) async {
           webViewController.addJavaScriptHandler(
@@ -113,8 +97,8 @@ class _DaumPostcodeSearchState extends State<DaumPostcodeSearch> {
         },
         onConsoleMessage: widget.onConsoleMessage,
         onProgressChanged: widget.onProgressChanged,
-        onLoadHttpError: widget.onLoadHttpError,
-        onLoadError: widget.onLoadError,
+        onReceivedHttpError: widget.onReceivedHttpError,
+        onReceivedError: widget.onReceivedError,
       );
     } else {
       result = Center(
